@@ -1,0 +1,148 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+//Define data structure to hold course objects
+
+struct Course {
+	string courseId;
+	string courseName;
+	vector<string> prerequisites;
+
+};
+
+//Function to load file and store contents
+
+void LoadData(vector<Course>& courseData, const string& filename) {
+
+	//Create object to open file
+
+	ifstream file(filename);
+
+	if (file.is_open()) {
+
+		string courseId;
+		string courseName;
+		string prerequisite;
+
+		while (file >> courseId >> courseName) {
+
+			Course course;
+			course.courseId = courseId;
+			course.courseName = courseName;
+
+			while (file >> prerequisite) {
+				course.prerequisites.push_back(prerequisite);
+			}
+			courseData.push_back(course);
+		}
+		file.close();
+	}
+	else {
+		cerr << "Error: Unable to open file." << endl;
+	}
+}
+
+//Function to print course information
+
+void printCourse(const vector<Course>& courseData, const string& courseId) {
+
+	for (const Course& course : courseData) {
+
+		if (course.courseId == courseId) {
+			cout << course.courseId << ", " << course.courseName << endl;
+
+			if (!course.prerequisites.empty()) {
+				cout << "Prerequisites:" << endl;
+
+				for (const string& prerequisite : course.prerequisites) {
+					cout << prerequisite << endl;
+				}
+			}
+			//Found and printed course info
+			return; 
+		}
+	}
+	cerr << "Error: Course not found." << endl;
+}
+
+//Print course information in alphanumeric order
+
+void printCourseList(const vector<Course>& courseData) {
+
+	vector<Course> sortedCourses = courseData;
+
+	sort(sortedCourses.begin(), sortedCourses.end(), [](const Course& a, const Course& b) {
+		return a.courseId < b.courseId;
+	});
+	for (const Course& course : sortedCourses) {
+		cout << course.courseId << ", " << course.courseName << endl;
+	}
+}
+
+
+int main() {
+
+	vector<Course> courseData;
+
+	int choice;
+	string filename;
+
+	cout << "Welcome to the course planner." << endl;
+
+	//Display Menu
+	while (true) {
+
+		cout << "1. Load Data Structure\n";
+		cout << "2. Print Course List\n";
+		cout << "3. Print Course\n";
+		cout << "4. Exit\n\n";
+		cout << "What would you like to do?\n";
+
+		//Prompt user to input a choice
+		if (!(cin >> choice)) {
+
+			cerr << choice << " is not a valid option." << endl;
+			cin.clear();
+			cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+			continue;
+		}
+
+		switch (choice) {
+		case 1:
+			cout << "Enter the filename containing course data: ";
+			cin >> filename;
+			LoadData(courseData, filename);
+			break;
+		case 2:
+			if (courseData.empty()) {
+				cerr << "Error: Course data not loaded." << endl;
+			}
+			else {
+				printCourseList(courseData);
+			}
+			break;
+		case 3:
+			if (courseData.empty()) {
+				cerr << "Error: Course data not loaded." << endl;
+			}
+			else {
+				string courseId;
+				cout << "What course do you want to know about?";
+				cin >> courseId;
+				printCourse(courseData, courseId);
+			}
+			break;
+		case 4:
+			cout << "Thank you for using the course planner!" << endl;
+			return 0;
+		default:
+			cerr << "Thank you for using the course planner!" << endl;
+			return 0;
+		}
+	}
+	return 0;
+}
